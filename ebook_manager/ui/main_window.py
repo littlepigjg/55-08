@@ -20,6 +20,7 @@ from .book_table import BookTableWidget
 from .edit_panel import MetadataEditPanel
 from .search_dialog import OnlineSearchDialog
 from .convert_dialog import ConvertDialog
+from .plugin_market_dialog import PluginMarketDialog
 from .workers import ScanWorker, ParseWorker
 
 
@@ -144,6 +145,10 @@ class MainWindow(QMainWindow):
         convert_action.triggered.connect(lambda: self._on_convert_requested(self.book_table.get_selected_books()))
         tool_menu.addAction(convert_action)
 
+        plugin_market_action = QAction("插件市场(&P)...", self)
+        plugin_market_action.triggered.connect(self._open_plugin_market)
+        tool_menu.addAction(plugin_market_action)
+
         calibre_status = QAction("Calibre 状态检查", self)
         calibre_status.triggered.connect(self._check_calibre)
         tool_menu.addAction(calibre_status)
@@ -259,6 +264,11 @@ class MainWindow(QMainWindow):
                 self._books.append(BookMeta(file_path=f, file_format=Path(f).suffix.lstrip("."), title=Path(f).stem))
         self.book_table.load_books(self._books)
         self.statusBar().showMessage(f"已导入 {len(new_files)} 本电子书")
+
+    def _open_plugin_market(self):
+        plugin_manager = self._source_manager.get_plugin_manager()
+        dialog = PluginMarketDialog(plugin_manager, self)
+        dialog.exec()
 
     def _check_calibre(self):
         if self._converter.is_calibre_available:
